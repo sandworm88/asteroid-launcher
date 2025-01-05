@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2023 Ed Beroset <beroset@ieee.org>
  *               2022 Timo Könnecke <github.com/eLtMosen>
@@ -32,7 +34,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 import QtQuick 2.15
 import QtGraphicalEffects 1.12
 import org.asteroid.controls 1.0
@@ -50,6 +51,8 @@ Item {
     property int numColumns: 3
 
     // these are from the calling code
+
+
     /*
     property bool fakePressed:     false
     property bool toTopAllowed:    true
@@ -61,7 +64,6 @@ Item {
     property bool forbidLeft:      false
     property bool forbidRight:     false
     */
-
     Connections {
         target: grid
         function onCurrentVerticalPosChanged() {
@@ -83,7 +85,7 @@ Item {
             enabled: !appsView.dragging
 
             property int pressAndHoldDuration: 200
-            signal timedPressAndHold()
+            signal timedPressAndHold
 
             Timer {
                 id: pressAndHoldTimer
@@ -92,12 +94,11 @@ Item {
                 running: false
                 repeat: false
                 onTriggered: {
-                     if (!root.dragStop) {
-                         parent.timedPressAndHold()
-                     }
-                     else {
-                         root.dragStop = false
-                     }
+                    if (!root.dragStop) {
+                        parent.timedPressAndHold()
+                    } else {
+                        root.dragStop = false
+                    }
                 }
             }
 
@@ -107,12 +108,12 @@ Item {
             }
 
             onPressed: {
-                pressAndHoldTimer.start();
+                pressAndHoldTimer.start()
                 root.dragStop = false
             }
 
             onReleased: {
-                pressAndHoldTimer.stop();
+                pressAndHoldTimer.stop()
             }
 
             onTimedPressAndHold: {
@@ -140,14 +141,15 @@ Item {
 
                 Rectangle {
                     id: circle
-
                     anchors.fill: parent
                     radius: width / 2
-                    color: !pressAndHoldTimer.running && launcherItem.pressed | fakePressed ?
-                               alb.centerColor(launcherModel.get(currentPressedIndex).filePath) :
-                               "#f4f4f4"
-                    Behavior on color {
-                        PropertyAnimation { target: circle; property: "color"; duration: 70 }
+                    opacity: launcherItem.pressed | fakePressed ? 0.8 : 1.0
+                    color: alb.centerColor(launcherModel.get(index).filePath)
+                    Behavior on opacity {
+                        PropertyAnimation {
+                            target: circle
+                            duration: 70
+                        }
                     }
                 }
             }
@@ -165,14 +167,36 @@ Item {
 
             Icon {
                 id: icon
-
                 width: circleWrapper.width * .70
                 height: width
                 anchors.centerIn: circleWrapper
-                color: !pressAndHoldTimer.running && launcherItem.pressed | fakePressed ? "#fff" : "#555"
+                opacity: launcherItem.pressed | fakePressed ? 1.0 : 0.9
                 name: model.object.iconId === "" ? "ios-help" : model.object.iconId
-                Behavior on color {
-                    PropertyAnimation { target: icon; property: "color"; duration: 70 }
+            }
+
+            Label {
+                id: iconText
+                anchors.top: icon.bottom
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                anchors.topMargin: parent.height * 0.116
+                anchors.horizontalCenter: circleWrapper.horizontalCenter
+                color: "#ffffff"
+                font.pixelSize: ((appsView.width
+                                  > appsView.height ? appsView.height : appsView.width) / Dims.l(
+                                     100)) * Dims.l(3)
+                font.styleName: "SemiCondensed Bold"
+                font.letterSpacing: parent.width * 0.002
+                text: model.object.title.toUpperCase(
+                          ) + localeManager.changesObserver
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    transparentBorder: true
+                    horizontalOffset: 0
+                    verticalOffset: 0
+                    radius: 3.0
+                    samples: 3
+                    color: "#80000000"
                 }
             }
         }
@@ -199,7 +223,7 @@ Item {
         clip: true
         cellHeight: height / numColumns
         cellWidth: width / numColumns
-        contentY: -height / (2*numColumns)
+        contentY: -height / (2 * numColumns)
 
         header: spacer
         footer: spacer
@@ -235,7 +259,8 @@ Item {
 
         onAtYBeginningChanged: {
             // Make sure that the grid doesn't move when the app view is visible.
-            if ((grid.currentHorizontalPos === 0) && (grid.currentVerticalPos === 1)) {
+            if ((grid.currentHorizontalPos === 0)
+                    && (grid.currentVerticalPos === 1)) {
                 forbidTop = !atYBeginning
                 grid.changeAllowedDirections()
             }
@@ -249,9 +274,15 @@ Item {
             launcherColorOverride = true
             toLeftAllowed = false
             toRightAllowed = false
-            toBottomAllowed =  Qt.binding(function() { return !atYBeginning })
-            toTopAllowed = Qt.binding(function() { return !atYEnd })
-            forbidTop = Qt.binding(function() { return !atYBeginning })
+            toBottomAllowed = Qt.binding(function () {
+                return !atYBeginning
+            })
+            toTopAllowed = Qt.binding(function () {
+                return !atYEnd
+            })
+            forbidTop = Qt.binding(function () {
+                return !atYBeginning
+            })
             forbidBottom = false
             forbidLeft = false
             forbidRight = false
@@ -282,7 +313,8 @@ Item {
         visible: !root.clickToggle
         anchors {
             centerIn: hoverTitle
-            verticalCenterOffset: root.clickY > Dims.h(48) ? -Dims.h(2) : Dims.h(2)
+            verticalCenterOffset: root.clickY > Dims.h(48) ? -Dims.h(
+                                                                 2) : Dims.h(2)
         }
         width: root.width
         height: root.height * .24
@@ -293,7 +325,8 @@ Item {
         id: hoverTitle
 
         // Offset hoverText and shutter out of view, either to top or bottom depending on vertical click position
-        property real hoverTextOffset: root.clickY > Dims.h(48) ? -Dims.h(62) : Dims.h(62)
+        property real hoverTextOffset: root.clickY > Dims.h(
+                                           48) ? -Dims.h(62) : Dims.h(62)
         property bool rootPressToggle: root.pressToggle
 
         width: parent.width
@@ -302,10 +335,13 @@ Item {
         visible: !root.clickToggle
         horizontalAlignment: Text.AlignHCenter
         anchors.centerIn: parent
-        style: Text.Outline;
-        styleColor: alb.centerColor(launcherModel.get(currentPressedIndex).filePath)
+        style: Text.Outline
+        styleColor: alb.centerColor(launcherModel.get(
+                                        currentPressedIndex).filePath)
         font {
-            pixelSize: ((appsView.width > appsView.height ? appsView.height : appsView.width) / Dims.l(100)) * Dims.l(9)
+            pixelSize: ((appsView.width
+                         > appsView.height ? appsView.height : appsView.width) / Dims.l(
+                            100)) * Dims.l(9)
             styleName: "Condensed Medium"
             letterSpacing: -parent.width * .004
         }
@@ -316,23 +352,64 @@ Item {
                 id: fadeText
 
                 // Reset position of all animated items for the case an animation has been interrupted
-                NumberAnimation { target: hoverTitle; property: "anchors.verticalCenterOffset"; to: hoverTitle.hoverTextOffset; duration: 0}
-                NumberAnimation { target: hoverTitle; property: "opacity"; to: 1; duration: 0}
-                NumberAnimation { target: titleShutter; property: "opacity"; to: .85; duration: 0}
+                NumberAnimation {
+                    target: hoverTitle
+                    property: "anchors.verticalCenterOffset"
+                    to: hoverTitle.hoverTextOffset
+                    duration: 0
+                }
+                NumberAnimation {
+                    target: hoverTitle
+                    property: "opacity"
+                    to: 1
+                    duration: 0
+                }
+                NumberAnimation {
+                    target: titleShutter
+                    property: "opacity"
+                    to: .85
+                    duration: 0
+                }
 
-                PropertyAction { }
+                PropertyAction {}
 
                 // Slide in hoverTitle and shutter to either negative or positve offset from center depending on vertical click position
-                NumberAnimation { target: hoverTitle; property: "anchors.verticalCenterOffset"; to: -hoverTitle.hoverTextOffset + (hoverTitle.hoverTextOffset * 1.58); duration: 100; easing.type: Easing.InSine}
+                NumberAnimation {
+                    target: hoverTitle
+                    property: "anchors.verticalCenterOffset"
+                    to: -hoverTitle.hoverTextOffset + (hoverTitle.hoverTextOffset * 1.58)
+                    duration: 100
+                    easing.type: Easing.InSine
+                }
 
                 // Keep hoverTitle in visible position for 1s
-                PauseAnimation { duration: 1000 }
+                PauseAnimation {
+                    duration: 1000
+                }
 
                 // Slide hoverTitle and shutter out of view again
                 ParallelAnimation {
-                    NumberAnimation { target: hoverTitle; property: "opacity"; to: 0; duration: 200; easing.type: Easing.InSine}
-                    NumberAnimation { target: titleShutter; property: "opacity"; to: 0; duration: 200; easing.type: Easing.InSine}
-                    NumberAnimation { target: hoverTitle; property: "anchors.verticalCenterOffset"; to: hoverTitle.hoverTextOffset; duration: 200; easing.type: Easing.InSine}
+                    NumberAnimation {
+                        target: hoverTitle
+                        property: "opacity"
+                        to: 0
+                        duration: 200
+                        easing.type: Easing.InSine
+                    }
+                    NumberAnimation {
+                        target: titleShutter
+                        property: "opacity"
+                        to: 0
+                        duration: 200
+                        easing.type: Easing.InSine
+                    }
+                    NumberAnimation {
+                        target: hoverTitle
+                        property: "anchors.verticalCenterOffset"
+                        to: hoverTitle.hoverTextOffset
+                        duration: 200
+                        easing.type: Easing.InSine
+                    }
                 }
             }
         }
